@@ -18,6 +18,7 @@ jobs:
         with:
           fetch-depth: 0  # Récupère tout l'historique
           fetch-tags: true
+          persist-credentials: false  # Ne pas persister les credentials du checkout
 
       - name: Configure Git
         run: |
@@ -37,7 +38,7 @@ jobs:
       #     TARGET_TOKEN: ${{ secrets.LAURENT_PAT }}
       #   if: env.TARGET_REPO != '' && env.TARGET_TOKEN != ''
       #   run: |
-      #     git remote add laurent https://${TARGET_TOKEN}@${TARGET_REPO#https://}
+      #     git remote add laurent https://${TARGET_TOKEN}@${TARGET_REPO} || true
       #     git push laurent --all --force
       #     git push laurent --tags --force
       #   continue-on-error: true
@@ -48,7 +49,7 @@ jobs:
       #     TARGET_TOKEN: ${{ secrets.WILLIAM_PAT }}
       #   if: env.TARGET_REPO != '' && env.TARGET_TOKEN != ''
       #   run: |
-      #     git remote add william https://${TARGET_TOKEN}@${TARGET_REPO#https://}
+      #     git remote add william https://${TARGET_TOKEN}@${TARGET_REPO} || true
       #     git push william --all --force
       #     git push william --tags --force
       #   continue-on-error: true
@@ -59,7 +60,7 @@ jobs:
       #     TARGET_TOKEN: ${{ secrets.FLORIAN_PAT }}
       #   if: env.TARGET_REPO != '' && env.TARGET_TOKEN != ''
       #   run: |
-      #     git remote add florian https://${TARGET_TOKEN}@${TARGET_REPO#https://}
+      #     git remote add florian https://${TARGET_TOKEN}@${TARGET_REPO} || true
       #     git push florian --all --force
       #     git push florian --tags --force
       #   continue-on-error: true
@@ -70,7 +71,7 @@ jobs:
       #     TARGET_TOKEN: ${{ secrets.NOA_PAT }}
       #   if: env.TARGET_REPO != '' && env.TARGET_TOKEN != ''
       #   run: |
-      #     git remote add noa https://${TARGET_TOKEN}@${TARGET_REPO#https://}
+      #     git remote add noa https://${TARGET_TOKEN}@${TARGET_REPO} || true
       #     git push noa --all --force
       #     git push noa --tags --force
       #   continue-on-error: true
@@ -81,7 +82,7 @@ jobs:
       #     TARGET_TOKEN: ${{ secrets.CHARLY_PAT }}
       #   if: env.TARGET_REPO != '' && env.TARGET_TOKEN != ''
       #   run: |
-      #     git remote add charly https://${TARGET_TOKEN}@${TARGET_REPO#https://}
+      #     git remote add charly https://${TARGET_TOKEN}@${TARGET_REPO} || true
       #     git push charly --all --force
       #     git push charly --tags --force
       #   continue-on-error: true
