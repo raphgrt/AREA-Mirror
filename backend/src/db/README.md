@@ -4,7 +4,7 @@
 
 ### In Services
 
-Inject the `DbService` or use the `DRIZZLE` token directly:
+Inject the `DbService` as follows:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
