@@ -33,6 +33,8 @@ services:
       - POSTGRES_NAME=${POSTGRES_NAME:-area}
       - POSTGRES_USER=${POSTGRES_USER:-area_user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-area_password}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BACKEND_PORT=${BACKEND_PORT}
     depends_on:
       area-postgres:
         condition: service_healthy
