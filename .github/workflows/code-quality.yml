@@ -1,0 +1,96 @@
+name: Code Quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend-format:
+    name: Check Backend Format
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: dcodeIO/setup-node-nvm@master
+        with:
+          node-version: lts/*
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: pnpm install --frozen-lockfile
+
+      - name: Install prettier
+        working-directory: ./backend
+        run: pnpm add -D prettier
+
+      - name: Check formatting with prettier
+        working-directory: ./backend
+        run: pnpm format:check
+
+  backend-eslint:
+    name: Check Backend Format
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: dcodeIO/setup-node-nvm@master
+        with:
+          node-version: lts/*
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting with prettier
+        working-directory: ./backend
+        run: pnpm lint:check
+
+  frontend-build:
+    name: Build Frontend
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: dcodeIO/setup-node-nvm@master
+        with:
+          node-version: lts/*
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: ./backend
+        run: pnpm build

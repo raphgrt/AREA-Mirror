@@ -158,6 +158,9 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-area_password}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
       - BACKEND_PORT=${BACKEND_PORT}
+      - REDIS_PASS=${REDIS_PASS}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       patroni1:
         condition: service_healthy
@@ -192,6 +195,16 @@ services:
     volumes:
       - vault_data:/vault/file
 
+  cache:
+    image: redis:6.2-alpine
+    container_name: area-cache
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASS}
+    volumes:
+      - cache:/data
+
 networks:
   patroni:
   area-network:
@@ -200,6 +213,8 @@ networks:
 volumes:
   postgres_data:
   vault_data:
+  cache:
+    driver: local
   etcd1-data:
   etcd2-data:
   etcd3-data:
