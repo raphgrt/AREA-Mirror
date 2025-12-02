@@ -1,4 +1,4 @@
-import { WebSocketGateway } from '@nestjs/websockets';
+import { WebSocketGateway } from "@nestjs/websockets";
 
 // NOTE:
 // Here you will be able to define websocket events (https://docs.nestjs.com/websockets/gateways#overview)
@@ -7,5 +7,5 @@ import { WebSocketGateway } from '@nestjs/websockets';
 //   return data;
 // }
 
-@WebSocketGateway({ namespace: 'websocket' })
+@WebSocketGateway({ namespace: "websocket" })
 export class EventsGateway {}

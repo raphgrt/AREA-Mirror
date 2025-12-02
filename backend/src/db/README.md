@@ -7,8 +7,8 @@
 Inject the `DbService` as follows:
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { DbService } from './db/db.service';
+import { Injectable } from "@nestjs/common";
+import { DbService } from "./db/db.service";
 
 @Injectable()
 export class YourService {
@@ -23,16 +23,14 @@ export class YourService {
 Or inject Drizzle directly:
 
 ```typescript
-import { Inject, Injectable } from '@nestjs/common';
-import { DRIZZLE } from './db/drizzle.module';
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from './db/schema';
+import { Inject, Injectable } from "@nestjs/common";
+import { DRIZZLE } from "./db/drizzle.module";
+import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import * as schema from "./db/schema";
 
 @Injectable()
 export class YourService {
-  constructor(
-    @Inject(DRIZZLE) private db: PostgresJsDatabase<typeof schema>,
-  ) {}
+  constructor(@Inject(DRIZZLE) private db: PostgresJsDatabase<typeof schema>) {}
 }
 ```
 
