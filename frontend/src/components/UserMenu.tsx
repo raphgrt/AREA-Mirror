@@ -29,11 +29,11 @@ export function UserMenu() {
           <div className="absolute bottom-full left-4 right-4 mb-2 z-20">
               <div className="bg-popover border border-border rounded-xl shadow-xl overflow-hidden p-1 animate-in slide-in-from-bottom-2 fade-in duration-200">
                   <Link 
-                      to="/connections" 
+                      to="/integrations" 
                       onClick={() => setIsUserMenuOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors"
                   >
-                      <Link2 size={16} /> Connections
+                      <Link2 size={16} /> Integrations
                   </Link>
                   <Link 
                       to="/profile" 

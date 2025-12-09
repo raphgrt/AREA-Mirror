@@ -46,7 +46,7 @@ export const MOCK_WORKFLOWS: Workflow[] = [
   { 
     id: '4', 
     name: 'Email Auto-responder', 
-    isActive: true, 
+    isActive: false, 
     lastRun: 'Just now',
     nodes: [],
     edges: []
