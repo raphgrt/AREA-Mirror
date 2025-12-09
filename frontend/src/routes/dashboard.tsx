@@ -1,12 +1,10 @@
 import { useState, useCallback } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { 
-  useNodesState, 
-  useEdgesState, 
-  addEdge,
   type Connection,
   type Node,
-  type Edge
+  type NodeChange,
+  type EdgeChange
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { DashboardLayout } from '../components/dashboard/DashboardLayout'
@@ -14,20 +12,34 @@ import { DashboardHeader } from '../components/dashboard/Header'
 import { FloatingActionButton } from '../components/dashboard/ActionButton'
 import { NodeDrawer } from '../components/dashboard/NodeDrawer'
 import { WorkflowCanvas } from '../components/dashboard/WorkflowCanvas'
-import { INITIAL_NODES } from '../mocks/nodes'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { nodesChange, edgesChange, connect, addNode as addNodeAction } from '../store/slices/flowSlice'
+import { updateWorkflow } from '../store/slices/workflowsSlice'
 
 export const Route = createFileRoute('/dashboard')({
   component: Dashboard,
 })
 
-function Dashboard() {  const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES)
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+function Dashboard() {
+  const dispatch = useAppDispatch()
+  const { nodes, edges, activeWorkflowId } = useAppSelector((state) => state.flow)
+  const workflows = useAppSelector((state) => state.workflows.items)
+  
+  const activeWorkflow = workflows.find(w => w.id === activeWorkflowId) || workflows[0]
+  
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [isWorkflowActive, setIsWorkflowActive] = useState(true)
+
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    dispatch(nodesChange(changes))
+  }, [dispatch])
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    dispatch(edgesChange(changes))
+  }, [dispatch])
 
   const onConnect = useCallback((params: Connection) => {
-    setEdges((eds) => addEdge(params, eds))
-  }, [setEdges])
+    dispatch(connect(params))
+  }, [dispatch])
 
   const addNode = (type: string, label: string) => {
     const newNode: Node = {
@@ -47,17 +59,23 @@ function Dashboard() {  const [nodes, setNodes, onNodesChange] = useNodesState(I
         borderRadius: '8px',
       }
     }
-    setNodes((nds) => [...nds, newNode])
+    dispatch(addNodeAction(newNode))
     setIsDrawerOpen(false)
+  }
+
+  const handleToggleActive = () => {
+    if (activeWorkflow) {
+      dispatch(updateWorkflow({ ...activeWorkflow, isActive: !activeWorkflow.isActive }))
+    }
   }
 
   return (
     <DashboardLayout>
       <div className="h-full w-full relative bg-background overflow-hidden">
         <DashboardHeader 
-          workflowName="GitHub to Slack Alert"
-          isActive={isWorkflowActive}
-          onToggleActive={() => setIsWorkflowActive(!isWorkflowActive)}
+          workflowName={activeWorkflow?.name || 'Untitled Workflow'}
+          isActive={activeWorkflow?.isActive || false}
+          onToggleActive={handleToggleActive}
           onDelete={() => alert('Delete workflow?')}
           onSave={() => alert('Save workflow?')}
         />

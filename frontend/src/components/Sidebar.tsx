@@ -1,11 +1,42 @@
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Clock, Plus } from 'lucide-react'
 import clsx from 'clsx'
 import { UserMenu } from './UserMenu'
-import { MOCK_WORKFLOWS } from '../mocks/workflows'
-import { type WorkflowSummary } from '../types/workflow'
+import { type Workflow } from '../types/workflow'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { addWorkflow } from '../store/slices/workflowsSlice'
+import { setWorkflow } from '../store/slices/flowSlice'
+import { INITIAL_NODES } from '../mocks/nodes'
 
 export function Sidebar() {
+  const workflows = useAppSelector((state) => state.workflows.items)
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+
+  const handleCreateWorkflow = () => {
+    const newId = Math.random().toString(36).substr(2, 9)
+    const newWorkflow: Workflow = {
+        id: newId,
+        name: 'New Workflow',
+        isActive: true,
+        lastRun: 'Never',
+        nodes: INITIAL_NODES,
+        edges: []
+    }
+    
+    // Add to list
+    dispatch(addWorkflow(newWorkflow))
+    
+    // Set as active and reset canvas
+    dispatch(setWorkflow({
+        id: newId,
+        nodes: newWorkflow.nodes,
+        edges: newWorkflow.edges
+    }))
+
+    navigate({ to: '/dashboard' })
+  }
+
   return (
     <div className="absolute top-4 left-4 bottom-4 w-64 bg-card/95 backdrop-blur-sm border border-border/50 text-foreground flex flex-col font-sans rounded-2xl shadow-2xl z-30 transition-all duration-300">
       <div className="p-6 pb-2">
@@ -15,7 +46,10 @@ export function Sidebar() {
       </div>
 
       <div className="px-4 py-2">
-        <button className="w-full flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors text-sm font-medium border border-primary/20">
+        <button 
+            onClick={handleCreateWorkflow}
+            className="w-full flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors text-sm font-medium border border-primary/20 cursor-pointer"
+        >
             <Plus size={16} />
             <span>New Workflow</span>
         </button>
@@ -25,7 +59,7 @@ export function Sidebar() {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
           Your Workflows
         </div>
-        {MOCK_WORKFLOWS.map((wf) => (
+        {workflows.map((wf) => (
           <WorkflowItem key={wf.id} workflow={wf} />
         ))}
       </div>
@@ -35,15 +69,35 @@ export function Sidebar() {
   )
 }
 
-function WorkflowItem({ workflow }: { workflow: WorkflowSummary }) {
+function WorkflowItem({ workflow }: { workflow: Workflow }) {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const activeWorkflowId = useAppSelector((state) => state.flow.activeWorkflowId)
+  // If activeWorkflowId is null, check if this is the first workflow (default active)
+  const isActive = activeWorkflowId === workflow.id
+
+  const handleWorkflowClick = () => {
+      dispatch(setWorkflow({
+          id: workflow.id,
+          nodes: workflow.nodes,
+          edges: workflow.edges
+      }))
+      navigate({ to: '/dashboard' })
+  }
+
   return (
-    <Link 
-      to="/dashboard"
-      className="group flex flex-col gap-1.5 p-3 rounded-xl border border-transparent hover:bg-accent hover:border-border/50 transition-all cursor-pointer"
-      activeProps={{ className: '!bg-accent !border-border' }}
+    <button 
+      onClick={handleWorkflowClick}
+      className={clsx(
+        "w-full group flex flex-col gap-1.5 p-3 rounded-xl border border-transparent transition-all cursor-pointer text-left",
+        isActive ? "bg-accent border-border" : "hover:bg-accent hover:border-border/50"
+      )}
     >
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+      <div className="flex items-center justify-between w-full">
+        <span className={clsx(
+            "font-medium text-sm transition-colors",
+            isActive ? "text-primary" : "text-foreground group-hover:text-primary"
+        )}>
             {workflow.name}
         </span>
         <div className={clsx(
@@ -57,6 +111,6 @@ function WorkflowItem({ workflow }: { workflow: WorkflowSummary }) {
         <Clock size={12} />
         <span>{workflow.lastRun}</span>
       </div>
-    </Link>
+    </button>
   )
 }

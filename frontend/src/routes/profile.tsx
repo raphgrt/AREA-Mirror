@@ -1,13 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { DashboardLayout } from '../components/dashboard/DashboardLayout'
 import { User, Trash2 } from 'lucide-react'
-import { MOCK_USER } from '../mocks/user'
+import { useAppSelector } from '../store/hooks'
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
 })
 
 function Profile() {
+  const user = useAppSelector((state) => state.auth.user)
+
+  if (!user) return null
+
   return (
     <DashboardLayout>
       <div className="p-8 max-w-4xl mx-auto">
@@ -19,8 +23,8 @@ function Profile() {
               <User size={48} />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold">{MOCK_USER.name}</h2>
-              <p className="text-muted-foreground">{MOCK_USER.email}</p>
+              <h2 className="text-2xl font-semibold">{user.name}</h2>
+              <p className="text-muted-foreground">{user.email}</p>
             </div>
           </div>
 
@@ -29,7 +33,7 @@ function Profile() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">Display Name</label>
               <input
                 type="text"
-                defaultValue={MOCK_USER.name}
+                defaultValue={user.name}
                 className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
@@ -37,7 +41,7 @@ function Profile() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">Email Address</label>
               <input
                 type="email"
-                defaultValue={MOCK_USER.email}
+                defaultValue={user.email}
                 className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>

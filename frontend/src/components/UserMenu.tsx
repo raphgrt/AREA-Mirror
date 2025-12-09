@@ -8,10 +8,13 @@ import {
   MoreVertical
 } from 'lucide-react'
 import clsx from 'clsx'
-import { MOCK_USER } from '../mocks/user'
+import { useAppSelector } from '../store/hooks'
 
 export function UserMenu() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const user = useAppSelector((state) => state.auth.user)
+
+  if (!user) return null
 
   return (
     <div className="p-4 border-t border-border relative">
@@ -62,10 +65,11 @@ export function UserMenu() {
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
               <UserIcon size={20} />
           </div>
-                      <div className="flex-1 text-left overflow-hidden">
-                          <div className="font-medium text-sm truncate text-foreground">{MOCK_USER.name}</div>
-                          <div className="text-xs text-muted-foreground truncate">{MOCK_USER.email}</div>
-                      </div>          <MoreVertical size={16} className="text-muted-foreground" />
+          <div className="flex-1 text-left overflow-hidden">
+              <div className="font-medium text-sm truncate text-foreground">{user.name}</div>
+              <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+          </div>
+          <MoreVertical size={16} className="text-muted-foreground" />
       </button>
     </div>
   )
