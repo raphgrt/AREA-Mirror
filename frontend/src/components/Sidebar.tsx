@@ -2,20 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { Clock, Plus } from 'lucide-react'
 import clsx from 'clsx'
 import { UserMenu } from './UserMenu'
-
-type Workflow = {
-  id: string
-  name: string
-  isActive: boolean
-  lastRun: string
-}
-
-const MOCK_WORKFLOWS: Workflow[] = [
-  { id: '1', name: 'GitHub to Slack Alert', isActive: true, lastRun: '2 mins ago' },
-  { id: '2', name: 'New Lead Processing', isActive: true, lastRun: '1 hour ago' },
-  { id: '3', name: 'Weekly Database Backup', isActive: false, lastRun: '5 days ago' },
-  { id: '4', name: 'Email Auto-responder', isActive: true, lastRun: 'Just now' },
-]
+import { MOCK_WORKFLOWS, type Workflow } from '../mocks/workflows'
 
 export function Sidebar() {
   return (

@@ -8,6 +8,7 @@ import {
   MoreVertical
 } from 'lucide-react'
 import clsx from 'clsx'
+import { MOCK_USER } from '../mocks/user'
 
 export function UserMenu() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
@@ -62,8 +63,8 @@ export function UserMenu() {
               <UserIcon size={20} />
           </div>
           <div className="flex-1 text-left overflow-hidden">
-              <div className="font-medium text-sm truncate text-foreground">John Doe</div>
-              <div className="text-xs text-muted-foreground truncate">john@example.com</div>
+              <div className="font-medium text-sm truncate text-foreground">{MOCK_USER.displayName}</div>
+              <div className="text-xs text-muted-foreground truncate">{MOCK_USER.email}</div>
           </div>
           <MoreVertical size={16} className="text-muted-foreground" />
       </button>

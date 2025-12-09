@@ -14,23 +14,13 @@ import { DashboardHeader } from '../components/dashboard/Header'
 import { FloatingActionButton } from '../components/dashboard/ActionButton'
 import { NodeDrawer } from '../components/dashboard/NodeDrawer'
 import { WorkflowCanvas } from '../components/dashboard/WorkflowCanvas'
+import { INITIAL_NODES } from '../mocks/nodes'
 
 export const Route = createFileRoute('/dashboard')({
   component: Dashboard,
 })
 
-const INITIAL_NODES: Node[] = [
-  { 
-    id: '1', 
-    position: { x: 350, y: 200 }, 
-    data: { label: 'Webhook Trigger' },
-    type: 'input',
-    style: { background: 'var(--node-webhook)', color: 'white', border: '1px solid var(--border)', width: 180 }
-  },
-]
-
-function Dashboard() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES)
+function Dashboard() {  const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES)
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isWorkflowActive, setIsWorkflowActive] = useState(true)
