@@ -2,7 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { Clock, Plus } from 'lucide-react'
 import clsx from 'clsx'
 import { UserMenu } from './UserMenu'
-import { MOCK_WORKFLOWS, type Workflow } from '../mocks/workflows'
+import { MOCK_WORKFLOWS } from '../mocks/workflows'
+import { type WorkflowSummary } from '../types/workflow'
 
 export function Sidebar() {
   return (
@@ -34,7 +35,7 @@ export function Sidebar() {
   )
 }
 
-function WorkflowItem({ workflow }: { workflow: Workflow }) {
+function WorkflowItem({ workflow }: { workflow: WorkflowSummary }) {
   return (
     <Link 
       to="/dashboard"

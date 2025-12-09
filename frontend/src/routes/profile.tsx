@@ -19,7 +19,7 @@ function Profile() {
               <User size={48} />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold">{MOCK_USER.displayName}</h2>
+              <h2 className="text-2xl font-semibold">{MOCK_USER.name}</h2>
               <p className="text-muted-foreground">{MOCK_USER.email}</p>
             </div>
           </div>
@@ -29,7 +29,7 @@ function Profile() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">Display Name</label>
               <input
                 type="text"
-                defaultValue={MOCK_USER.displayName}
+                defaultValue={MOCK_USER.name}
                 className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
