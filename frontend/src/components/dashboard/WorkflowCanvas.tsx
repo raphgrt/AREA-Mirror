@@ -2,7 +2,6 @@ import {
   ReactFlow, 
   Background, 
   Controls, 
-  MiniMap, 
   BackgroundVariant,
   type Connection,
   type Node,
@@ -32,8 +31,13 @@ export function WorkflowCanvas({ nodes, edges, onNodesChange, onEdgesChange, onC
       colorMode="dark"
     >
       <Background color="var(--border)" gap={16} variant={BackgroundVariant.Dots} />
-      <Controls className="bg-card border-border fill-foreground" position="bottom-left" style={{ marginBottom: 80, marginLeft: 270 }} />
-      <MiniMap className="bg-card border-border" nodeColor="var(--muted)" position="bottom-right" style={{ marginBottom: 100 }} />
+      <Controls 
+        position="top-right" 
+        style={{ marginTop: 100 }}
+        showZoom={true}
+        showFitView={true}
+        showInteractive={true}
+      />
     </ReactFlow>
   )
 }
