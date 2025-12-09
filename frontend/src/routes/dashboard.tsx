@@ -15,6 +15,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { Plus, X, Zap, Box, Split } from 'lucide-react'
 import { DashboardLayout } from '../components/DashboardLayout'
+import { DashboardHeader } from '../components/DashboardHeader'
 import clsx from 'clsx'
 
 export const Route = createFileRoute('/dashboard')({
@@ -24,7 +25,7 @@ export const Route = createFileRoute('/dashboard')({
 const INITIAL_NODES: Node[] = [
   { 
     id: '1', 
-    position: { x: 250, y: 100 }, 
+    position: { x: 350, y: 200 }, 
     data: { label: 'Webhook Trigger' },
     type: 'input',
     style: { background: 'var(--node-webhook)', color: 'white', border: '1px solid var(--border)', width: 180 }
@@ -41,6 +42,7 @@ function Dashboard() {
   const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES)
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isWorkflowActive, setIsWorkflowActive] = useState(true)
 
   const onConnect = useCallback((params: Connection) => {
     setEdges((eds) => addEdge(params, eds))
@@ -50,8 +52,8 @@ function Dashboard() {
     const newNode: Node = {
       id: Math.random().toString(36).substr(2, 9),
       position: { 
-        x: Math.random() * 400 + 100, 
-        y: Math.random() * 400 + 100 
+        x: Math.random() * 400 + 350, 
+        y: Math.random() * 400 + 200 
       },
       data: { label },
       type,
@@ -71,6 +73,14 @@ function Dashboard() {
   return (
     <DashboardLayout>
       <div className="h-full w-full relative bg-background overflow-hidden">
+        <DashboardHeader 
+          workflowName="GitHub to Slack Alert"
+          isActive={isWorkflowActive}
+          onToggleActive={() => setIsWorkflowActive(!isWorkflowActive)}
+          onDelete={() => alert('Delete workflow?')}
+          onSave={() => alert('Save workflow?')}
+        />
+
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -81,14 +91,14 @@ function Dashboard() {
           colorMode="dark"
         >
           <Background color="var(--border)" gap={16} variant={BackgroundVariant.Dots} />
-          <Controls className="bg-card border-border fill-foreground" />
-          <MiniMap className="bg-card border-border" nodeColor="var(--muted)" />
+          <Controls className="bg-card border-border fill-foreground" position="bottom-left" style={{ marginBottom: 80, marginLeft: 270 }} />
+          <MiniMap className="bg-card border-border" nodeColor="var(--muted)" position="bottom-right" style={{ marginBottom: 100 }} />
         </ReactFlow>
 
         {/* Floating Action Button */}
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="absolute bottom-8 right-8 w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/40 flex items-center justify-center transition-transform hover:scale-105"
+          className="absolute bottom-8 right-8 w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/40 flex items-center justify-center transition-transform hover:scale-105 z-20"
         >
           <Plus size={28} />
         </button>
@@ -96,8 +106,8 @@ function Dashboard() {
         {/* Drawer */}
         <div
           className={clsx(
-            "absolute top-0 right-0 h-full w-80 bg-card border-l border-border shadow-2xl transition-transform duration-300 ease-in-out z-10",
-            isDrawerOpen ? "translate-x-0" : "translate-x-full"
+            "absolute top-4 bottom-4 right-4 w-80 bg-card/95 backdrop-blur border border-border/50 shadow-2xl rounded-2xl transition-transform duration-300 ease-in-out z-30",
+            isDrawerOpen ? "translate-x-0" : "translate-x-[110%]"
           )}
         >
           <div className="p-4 border-b border-border flex items-center justify-between">
