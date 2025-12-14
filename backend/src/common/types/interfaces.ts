@@ -3,6 +3,7 @@ import {
   ServiceProvider,
   CredentialType,
   ExecutionStatus,
+  TriggerType,
 } from "./enums";
 
 export interface IAction {
@@ -55,4 +56,17 @@ export interface IServiceConfig {
   metadata: IServiceMetadata;
   actions: IAction[];
   defaultCredentials?: ICredentials;
+}
+
+export interface ITrigger extends IAction {
+  isTrigger: true;
+  triggerType: TriggerType;
+}
+
+export interface TriggerEvent {
+  triggerId: string;
+  serviceProvider: ServiceProvider;
+  data: Record<string, any>;
+  userId?: string;
+  credentialsId?: string;
 }

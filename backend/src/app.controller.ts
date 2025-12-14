@@ -3,7 +3,8 @@ import { CacheInterceptor, CacheKey, CacheTTL } from "@nestjs/cache-manager";
 import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
 import { ServiceRegistry } from "./services/service-registry";
 import { ServicesService } from "./services/services-service";
-import { ServiceProvider, ActionType } from "./common/types/enums";
+import { ServiceProvider } from "./common/types/enums";
+import { IAction, ITrigger } from "./common/types/interfaces";
 
 @Controller()
 export class AppController {
@@ -28,14 +29,14 @@ export class AppController {
       const allActions = serviceInstance?.getActions() || [];
 
       const actions = allActions
-        .filter((action) => this.isTriggerAction(action.type))
+        .filter((action) => this.isTriggerAction(action))
         .map((action) => ({
           name: action.name.toLowerCase().replace(/\s+/g, "_"),
           description: action.description,
         }));
 
       const reactions = allActions
-        .filter((action) => !this.isTriggerAction(action.type))
+        .filter((action) => !this.isTriggerAction(action))
         .map((action) => ({
           name: action.name.toLowerCase().replace(/\s+/g, "_"),
           description: action.description,
@@ -59,8 +60,8 @@ export class AppController {
     };
   }
 
-  private isTriggerAction(actionType: ActionType): boolean {
-    const triggerTypes = [ActionType.READ_EMAIL];
-    return triggerTypes.includes(actionType);
+  private isTriggerAction(action: IAction): action is ITrigger {
+    // Check if the action implements ITrigger interface
+    return "isTrigger" in action && (action as ITrigger).isTrigger === true;
   }
 }

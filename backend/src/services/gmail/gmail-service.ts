@@ -7,6 +7,7 @@ import {
 } from "../../common/types/enums";
 import { SendEmailAction } from "./actions/send-email-action";
 import { ReadEmailAction } from "./actions/read-email-action";
+import { ReceiveEmailTrigger } from "./actions/receive-email-trigger";
 
 export class GmailService extends BaseService {
   constructor() {
@@ -18,10 +19,18 @@ export class GmailService extends BaseService {
         imageUrl:
           "https://www.gstatic.com/images/branding/product/1x/gmail_48dp.png",
         version: "1.0.0",
-        supportedActions: [ActionType.SEND_EMAIL, ActionType.READ_EMAIL],
+        supportedActions: [
+          ActionType.SEND_EMAIL,
+          ActionType.READ_EMAIL,
+          ActionType.RECEIVE_EMAIL,
+        ],
         credentialTypes: [CredentialType.OAUTH2],
       },
-      actions: [new SendEmailAction(), new ReadEmailAction()],
+      actions: [
+        new SendEmailAction(),
+        new ReadEmailAction(),
+        new ReceiveEmailTrigger(),
+      ],
     };
 
     super(config);
