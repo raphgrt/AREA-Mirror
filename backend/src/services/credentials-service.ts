@@ -17,15 +17,16 @@ export class CredentialsService {
     const credentialData = credentials.toJSON();
 
     if (credentials.id) {
+      const credId = parseInt(String(credentials.id), 10);
       const [updated] = await this.db
         .update(schema.credentials)
         .set({
-          name: credentialData.name,
-          data: credentialData.data,
+          name: String(credentialData.name),
+          data: credentialData.data as Record<string, unknown>,
           isValid: true,
           updatedAt: new Date(),
         })
-        .where(eq(schema.credentials.id, parseInt(credentials.id)))
+        .where(eq(schema.credentials.id, credId))
         .returning();
 
       return updated;
@@ -33,11 +34,12 @@ export class CredentialsService {
       const [created] = await this.db
         .insert(schema.credentials)
         .values({
-          userId: credentialData.userId,
-          serviceProvider: credentialData.serviceProvider as any,
-          type: credentialData.type as any,
-          name: credentialData.name,
-          data: credentialData.data,
+          userId: String(credentialData.userId),
+          serviceProvider:
+            credentialData.serviceProvider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
+          type: credentialData.type as unknown as (typeof schema.credentialTypeEnum.enumValues)[number],
+          name: String(credentialData.name),
+          data: credentialData.data as Record<string, unknown>,
           isValid: true,
         })
         .returning();
@@ -79,7 +81,10 @@ export class CredentialsService {
       .where(
         and(
           eq(schema.credentials.userId, userId),
-          eq(schema.credentials.serviceProvider, serviceProvider as any),
+          eq(
+            schema.credentials.serviceProvider,
+            serviceProvider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
+          ),
         ),
       );
 
@@ -103,12 +108,12 @@ export class CredentialsService {
     switch (provider) {
       case ServiceProvider.GMAIL:
         return GmailCredentials.fromJSON({
-          id: dbCredential.id.toString(),
-          userId: dbCredential.userId,
+          id: String(dbCredential.id),
+          userId: String(dbCredential.userId),
           serviceProvider: provider,
           type,
-          name: dbCredential.name,
-          data: dbCredential.data as any,
+          name: String(dbCredential.name),
+          data: dbCredential.data as Record<string, unknown>,
         });
       default:
         throw new Error(`Unsupported service provider: ${provider}`);

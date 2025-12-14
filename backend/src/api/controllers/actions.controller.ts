@@ -8,7 +8,6 @@ import {
   UseGuards,
   HttpException,
   HttpStatus,
-  ParseIntPipe,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -26,6 +25,8 @@ import { ServiceProvider, ExecutionStatus } from "../../common/types/enums";
 import { ExecuteActionDto } from "../dto/execute-action.dto";
 import { AuthGuard } from "../guards/auth.guard";
 import { CurrentUser } from "../decorators/user.decorator";
+import { AuthUser } from "../types/user";
+import { BaseCredentials } from "../../common/base/base-credentials";
 
 @ApiTags("Actions")
 @ApiBearerAuth()
@@ -44,10 +45,16 @@ export class ActionsController {
   @ApiParam({ name: "actionId", description: "Action identifier" })
   @ApiBody({ type: ExecuteActionDto })
   @ApiResponse({ status: 200, description: "Action executed successfully" })
-  @ApiResponse({ status: 400, description: "Invalid request or missing credentials" })
-  @ApiResponse({ status: 404, description: "Service, action, or credentials not found" })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid request or missing credentials",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Service, action, or credentials not found",
+  })
   async executeAction(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthUser,
     @Param("provider") provider: string,
     @Param("actionId") actionId: string,
     @Body() executeDto: ExecuteActionDto,
@@ -62,20 +69,17 @@ export class ActionsController {
       );
     }
 
-    let credentials;
+    let credentials: BaseCredentials;
     if (executeDto.credentialsId) {
       const cred = await this.credentialsService.getCredentialsById(
         executeDto.credentialsId,
       );
 
       if (!cred) {
-        throw new HttpException(
-          "Credentials not found",
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException("Credentials not found", HttpStatus.NOT_FOUND);
       }
 
-      if (cred.userId !== user.id) {
+      if (cred.userId !== String(user.id)) {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
 
@@ -83,7 +87,7 @@ export class ActionsController {
     } else {
       const userCredentials =
         await this.credentialsService.getUserServiceCredentials(
-          user.id,
+          String(user.id),
           serviceProvider,
         );
 
@@ -97,26 +101,32 @@ export class ActionsController {
       credentials = userCredentials[0];
     }
 
+    const credId: string | undefined = credentials.id;
+    const credentialsIdStr: string | undefined =
+      typeof credId === "string" ? credId : undefined;
+    const credentialsId = credentialsIdStr
+      ? parseInt(credentialsIdStr, 10)
+      : null;
     const execution = await this.actionsService.logExecution(
-      user.id,
+      String(user.id),
       serviceProvider,
       actionId,
-      credentials.id ? parseInt(credentials.id) : null,
+      credentialsId,
       ExecutionStatus.RUNNING,
-      executeDto.params,
+      executeDto.params as Record<string, unknown>,
     );
 
     try {
       const result = await serviceInstance.executeAction(
         actionId,
         executeDto.params,
-        credentials.id,
+        credentialsIdStr,
       );
 
       await this.actionsService.updateExecutionStatus(
         execution.id,
         result.status,
-        result.data,
+        result.data as Record<string, unknown> | undefined,
         result.error,
       );
 
@@ -141,15 +151,20 @@ export class ActionsController {
 
   @Get("executions")
   @ApiOperation({ summary: "Get execution history for the current user" })
-  @ApiQuery({ name: "limit", required: false, type: Number, description: "Maximum number of executions to return" })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Maximum number of executions to return",
+  })
   @ApiResponse({ status: 200, description: "List of executions" })
   async getExecutions(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthUser,
     @Query("limit") limit?: string,
   ) {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     const executions = await this.actionsService.getUserExecutions(
-      user.id,
+      String(user.id),
       limitNum,
     );
 
@@ -167,4 +182,3 @@ export class ActionsController {
     }));
   }
 }
-

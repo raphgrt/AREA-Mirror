@@ -19,28 +19,28 @@ export class GmailCredentials extends BaseCredentials {
     super(userId, ServiceProvider.GMAIL, CredentialType.OAUTH2, name, data, id);
   }
 
-  async isValid(): Promise<boolean> {
+  isValid(): Promise<boolean> {
     const data = this.data as GmailOAuth2Data;
 
     if (!data.accessToken) {
-      return false;
+      return Promise.resolve(false);
     }
 
     if (data.expiresAt && data.expiresAt < Date.now()) {
-      return false;
+      return Promise.resolve(false);
     }
 
-    return true;
+    return Promise.resolve(true);
   }
 
-  async refresh(): Promise<void> {
+  refresh(): Promise<void> {
     const data = this.data as GmailOAuth2Data;
 
     if (!data.refreshToken) {
-      throw new Error("No refresh token available");
+      return Promise.reject(new Error("No refresh token available"));
     }
 
-    throw new Error("Token refresh not yet implemented");
+    return Promise.reject(new Error("Token refresh not yet implemented"));
   }
 
   getAccessToken(): string {
@@ -51,7 +51,20 @@ export class GmailCredentials extends BaseCredentials {
     return (this.data as GmailOAuth2Data).refreshToken;
   }
 
-  static fromJSON(json: Record<string, any>): GmailCredentials {
-    return new GmailCredentials(json.userId, json.name, json.data, json.id);
+  static fromJSON(json: Record<string, unknown>): GmailCredentials {
+    let id: string | undefined;
+    if (json.id !== undefined && json.id !== null) {
+      if (typeof json.id === "string") {
+        id = json.id;
+      } else if (typeof json.id === "number") {
+        id = String(json.id);
+      }
+    }
+    return new GmailCredentials(
+      String(json.userId),
+      String(json.name),
+      json.data as GmailOAuth2Data,
+      id,
+    );
   }
 }

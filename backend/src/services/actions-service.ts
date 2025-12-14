@@ -25,11 +25,12 @@ export class ActionsService {
     const [action] = await this.db
       .insert(schema.serviceActions)
       .values({
-        serviceProvider: serviceProvider as any,
+        serviceProvider:
+          serviceProvider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
         actionId,
         name,
         description,
-        type: type as any,
+        type: type as unknown as (typeof schema.actionTypeEnum.enumValues)[number],
         inputSchema,
         outputSchema: outputSchema || null,
       })
@@ -41,7 +42,7 @@ export class ActionsService {
         set: {
           name,
           description,
-          type: type as any,
+          type: type as unknown as (typeof schema.actionTypeEnum.enumValues)[number],
           inputSchema,
           outputSchema: outputSchema || null,
           updatedAt: new Date(),
@@ -56,7 +57,12 @@ export class ActionsService {
     return this.db
       .select()
       .from(schema.serviceActions)
-      .where(eq(schema.serviceActions.serviceProvider, serviceProvider as any));
+      .where(
+        eq(
+          schema.serviceActions.serviceProvider,
+          serviceProvider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
+        ),
+      );
   }
 
   async getAction(serviceProvider: ServiceProvider, actionId: string) {
@@ -65,7 +71,10 @@ export class ActionsService {
       .from(schema.serviceActions)
       .where(
         and(
-          eq(schema.serviceActions.serviceProvider, serviceProvider as any),
+          eq(
+            schema.serviceActions.serviceProvider,
+            serviceProvider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
+          ),
           eq(schema.serviceActions.actionId, actionId),
         ),
       )
@@ -88,10 +97,11 @@ export class ActionsService {
       .insert(schema.actionExecutions)
       .values({
         userId,
-        serviceProvider: serviceProvider as any,
+        serviceProvider:
+          serviceProvider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
         actionId,
         credentialsId,
-        status: status as any,
+        status: status as string,
         inputParams: inputParams || null,
         outputData: outputData || null,
         errorMessage: errorMessage || null,
@@ -115,7 +125,7 @@ export class ActionsService {
     await this.db
       .update(schema.actionExecutions)
       .set({
-        status: status as any,
+        status: status as string,
         outputData: outputData || null,
         errorMessage: errorMessage || null,
         completedAt:

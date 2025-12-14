@@ -24,7 +24,9 @@ import { ServiceProvider } from "../../common/types/enums";
 import { CreateCredentialsDto } from "../dto/create-credentials.dto";
 import { AuthGuard } from "../guards/auth.guard";
 import { CurrentUser } from "../decorators/user.decorator";
+import { AuthUser } from "../types/user";
 import { GmailCredentials } from "../../services/gmail";
+import { BaseCredentials } from "../../common/base/base-credentials";
 
 @ApiTags("Credentials")
 @ApiBearerAuth()
@@ -39,9 +41,9 @@ export class CredentialsController {
   @Get()
   @ApiOperation({ summary: "Get all credentials for the current user" })
   @ApiResponse({ status: 200, description: "List of user credentials" })
-  async getUserCredentials(@CurrentUser() user: any) {
+  async getUserCredentials(@CurrentUser() user: AuthUser) {
     const credentials = await this.credentialsService.getUserCredentials(
-      user.id,
+      String(user.id),
     );
 
     return credentials.map((cred) => ({
@@ -55,15 +57,23 @@ export class CredentialsController {
 
   @Get(":serviceProvider")
   @ApiOperation({ summary: "Get credentials for a specific service" })
-  @ApiParam({ name: "serviceProvider", description: "Service provider identifier" })
-  @ApiResponse({ status: 200, description: "List of credentials for the service" })
+  @ApiParam({
+    name: "serviceProvider",
+    description: "Service provider identifier",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "List of credentials for the service",
+  })
   async getServiceCredentials(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthUser,
     @Param("serviceProvider") serviceProvider: string,
   ) {
     const provider = serviceProvider as ServiceProvider;
-    const credentials =
-      await this.credentialsService.getUserServiceCredentials(user.id, provider);
+    const credentials = await this.credentialsService.getUserServiceCredentials(
+      user.id,
+      provider,
+    );
 
     return credentials.map((cred) => ({
       id: cred.id,
@@ -81,7 +91,7 @@ export class CredentialsController {
   @ApiResponse({ status: 400, description: "Invalid request" })
   @ApiResponse({ status: 404, description: "Service not found" })
   async createCredentials(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthUser,
     @Body() createDto: CreateCredentialsDto,
   ) {
     const provider = createDto.serviceProvider as ServiceProvider;
@@ -94,15 +104,56 @@ export class CredentialsController {
       );
     }
 
-    let credentials;
+    let credentials: BaseCredentials;
     switch (provider) {
-      case ServiceProvider.GMAIL:
+      case ServiceProvider.GMAIL: {
+        const data = createDto.data as Record<string, unknown>;
+        const accessTokenValue = data?.accessToken;
+        const refreshTokenValue = data?.refreshToken;
+        let accessToken = "";
+        if (typeof accessTokenValue === "string") {
+          accessToken = accessTokenValue;
+        } else if (accessTokenValue != null) {
+          if (
+            typeof accessTokenValue === "number" ||
+            typeof accessTokenValue === "boolean"
+          ) {
+            accessToken = String(accessTokenValue);
+          }
+        }
+        let refreshToken = "";
+        if (typeof refreshTokenValue === "string") {
+          refreshToken = refreshTokenValue;
+        } else if (refreshTokenValue != null) {
+          if (
+            typeof refreshTokenValue === "number" ||
+            typeof refreshTokenValue === "boolean"
+          ) {
+            refreshToken = String(refreshTokenValue);
+          }
+        }
+        const gmailData: GmailOAuth2Data = {
+          accessToken,
+          refreshToken,
+          tokenType:
+            data?.tokenType && typeof data.tokenType === "string"
+              ? data.tokenType
+              : undefined,
+          expiresAt:
+            typeof data?.expiresAt === "number" ? data.expiresAt : undefined,
+          scope:
+            data?.scope && typeof data.scope === "string"
+              ? data.scope
+              : undefined,
+        };
         credentials = new GmailCredentials(
-          user.id,
+          String(user.id),
           createDto.name,
-          createDto.data as any,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          gmailData,
         );
         break;
+      }
       default:
         throw new HttpException(
           `Unsupported service provider: ${provider}`,
@@ -128,7 +179,7 @@ export class CredentialsController {
   @ApiResponse({ status: 403, description: "Forbidden" })
   @ApiResponse({ status: 404, description: "Credentials not found" })
   async deleteCredentials(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthUser,
     @Param("id", ParseIntPipe) id: number,
   ) {
     const credential = await this.credentialsService.getCredentialsById(id);
@@ -137,7 +188,7 @@ export class CredentialsController {
       throw new HttpException("Credentials not found", HttpStatus.NOT_FOUND);
     }
 
-    if (credential.userId !== user.id) {
+    if (credential.userId !== String(user.id)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 
@@ -153,4 +204,3 @@ export class CredentialsController {
     return { success: true };
   }
 }
-

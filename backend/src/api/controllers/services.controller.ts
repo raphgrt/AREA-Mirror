@@ -36,35 +36,31 @@ export class ServicesController {
   })
   async getAllServices() {
     const services = await this.servicesService.getAllServices();
-    const servicesWithActions = await Promise.all(
-      services.map(async (service) => {
-        const serviceInstance = this.serviceRegistry.get(
-          service.provider as ServiceProvider,
-        );
-        const actions = serviceInstance?.getActions() || [];
+    return services.map((service) => {
+      const serviceInstance = this.serviceRegistry.get(
+        service.provider as ServiceProvider,
+      );
+      const actions = serviceInstance?.getActions() || [];
 
-        return {
-          id: service.id,
-          provider: service.provider,
-          name: service.name,
-          description: service.description,
-          imageUrl: service.imageUrl,
-          version: service.version,
-          supportedActions: service.supportedActions,
-          credentialTypes: service.credentialTypes,
-          actions: actions.map((action) => ({
-            id: action.id,
-            name: action.name,
-            description: action.description,
-            type: action.type,
-            inputSchema: action.inputSchema,
-            outputSchema: action.outputSchema,
-          })),
-        };
-      }),
-    );
-
-    return servicesWithActions;
+      return {
+        id: service.id,
+        provider: service.provider,
+        name: service.name,
+        description: service.description,
+        imageUrl: service.imageUrl,
+        version: service.version,
+        supportedActions: service.supportedActions,
+        credentialTypes: service.credentialTypes,
+        actions: actions.map((action) => ({
+          id: action.id,
+          name: action.name,
+          description: action.description,
+          type: action.type,
+          inputSchema: action.inputSchema,
+          outputSchema: action.outputSchema,
+        })),
+      };
+    });
   }
 
   @Get(":provider")
@@ -118,7 +114,7 @@ export class ServicesController {
   @ApiParam({ name: "provider", description: "Service provider identifier" })
   @ApiResponse({ status: 200, description: "List of actions" })
   @ApiResponse({ status: 404, description: "Service not found" })
-  async getServiceActions(@Param("provider") provider: string) {
+  getServiceActions(@Param("provider") provider: string) {
     const serviceProvider = provider as ServiceProvider;
     const serviceInstance = this.serviceRegistry.get(serviceProvider);
 
@@ -147,7 +143,7 @@ export class ServicesController {
   @ApiParam({ name: "actionId", description: "Action identifier" })
   @ApiResponse({ status: 200, description: "Action details" })
   @ApiResponse({ status: 404, description: "Action or service not found" })
-  async getAction(
+  getAction(
     @Param("provider") provider: string,
     @Param("actionId") actionId: string,
   ) {
@@ -180,4 +176,3 @@ export class ServicesController {
     };
   }
 }
-

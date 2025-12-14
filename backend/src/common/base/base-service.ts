@@ -149,10 +149,11 @@ export abstract class BaseService {
     }
 
     if (schema.properties) {
-      for (const [field, fieldSchema] of Object.entries(schema.properties)) {
+      const properties = schema.properties as Record<string, { type?: string }>;
+      for (const [field, fieldSchema] of Object.entries(properties)) {
         if (field in params) {
-          const value = params[field];
-          const expectedType = (fieldSchema as any).type;
+          const value: unknown = params[field] as unknown;
+          const expectedType = fieldSchema?.type;
 
           if (expectedType === "string" && typeof value !== "string") {
             return `Field ${field} must be a string`;
@@ -183,7 +184,7 @@ export abstract class BaseService {
     return this.config.metadata;
   }
 
-  protected createSuccessResult(data?: any): ActionResult {
+  protected createSuccessResult(data?: unknown): ActionResult {
     return {
       success: true,
       data,

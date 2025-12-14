@@ -61,21 +61,21 @@ export class ReadEmailAction implements IAction {
     },
   };
 
-  async execute(
+  execute(
     params: ActionParams,
     credentials: ICredentials,
   ): Promise<ActionResult> {
     if (!(credentials instanceof GmailCredentials)) {
-      return {
+      return Promise.resolve({
         success: false,
         error: "Invalid credentials type for Gmail service",
         status: ExecutionStatus.FAILED,
-      };
+      });
     }
 
     try {
-      const { query, maxResults = 10, labelIds } = params;
-      const accessToken = credentials.getAccessToken();
+      void params;
+      credentials.getAccessToken();
 
       const messages = [
         {
@@ -88,20 +88,20 @@ export class ReadEmailAction implements IAction {
         },
       ];
 
-      return {
+      return Promise.resolve({
         success: true,
         data: {
           messages,
           totalCount: messages.length,
         },
         status: ExecutionStatus.SUCCESS,
-      };
+      });
     } catch (error) {
-      return {
+      return Promise.resolve({
         success: false,
         error: error instanceof Error ? error.message : "Failed to read emails",
         status: ExecutionStatus.FAILED,
-      };
+      });
     }
   }
 }

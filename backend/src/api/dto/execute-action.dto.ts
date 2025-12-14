@@ -2,7 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class ExecuteActionDto {
   @ApiProperty({
-    description: "Optional credentials ID to use. If not provided, uses the first available credential for the service",
+    description:
+      "Optional credentials ID to use. If not provided, uses the first available credential for the service",
     required: false,
     example: 1,
   })
@@ -14,4 +15,3 @@ export class ExecuteActionDto {
   })
   params: Record<string, any>;
 }
-

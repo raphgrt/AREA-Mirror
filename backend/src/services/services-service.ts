@@ -10,19 +10,22 @@ import { BaseService } from "../common/base/base-service";
 export class ServicesService {
   constructor(@Inject(DRIZZLE) private db: PostgresJsDatabase<typeof schema>) {}
 
-  async saveService(service: BaseService): Promise<typeof schema.services.$inferSelect> {
+  async saveService(
+    service: BaseService,
+  ): Promise<typeof schema.services.$inferSelect> {
     const metadata = service.getMetadata();
 
     const [saved] = await this.db
       .insert(schema.services)
       .values({
-        provider: metadata.provider as any,
+        provider:
+          metadata.provider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
         name: metadata.name,
         description: metadata.description,
         imageUrl: metadata.imageUrl || null,
         version: metadata.version,
-        supportedActions: metadata.supportedActions as any,
-        credentialTypes: metadata.credentialTypes as any,
+        supportedActions: metadata.supportedActions as unknown as string[],
+        credentialTypes: metadata.credentialTypes as unknown as string[],
         isActive: true,
       })
       .onConflictDoUpdate({
@@ -32,8 +35,8 @@ export class ServicesService {
           description: metadata.description,
           imageUrl: metadata.imageUrl || null,
           version: metadata.version,
-          supportedActions: metadata.supportedActions as any,
-          credentialTypes: metadata.credentialTypes as any,
+          supportedActions: metadata.supportedActions as unknown as string[],
+          credentialTypes: metadata.credentialTypes as unknown as string[],
           updatedAt: new Date(),
         },
       })
@@ -46,7 +49,12 @@ export class ServicesService {
     const [service] = await this.db
       .select()
       .from(schema.services)
-      .where(eq(schema.services.provider, provider as any))
+      .where(
+        eq(
+          schema.services.provider,
+          provider as unknown as (typeof schema.serviceProviderEnum.enumValues)[number],
+        ),
+      )
       .limit(1);
 
     return service;

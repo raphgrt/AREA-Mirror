@@ -66,39 +66,39 @@ export class SendEmailAction implements IAction {
     },
   };
 
-  async execute(
+  execute(
     params: ActionParams,
     credentials: ICredentials,
   ): Promise<ActionResult> {
     if (!(credentials instanceof GmailCredentials)) {
-      return {
+      return Promise.resolve({
         success: false,
         error: "Invalid credentials type for Gmail service",
         status: ExecutionStatus.FAILED,
-      };
+      });
     }
 
     try {
-      const { to, subject, body, cc, bcc, isHtml } = params;
-      const accessToken = credentials.getAccessToken();
+      void params;
+      credentials.getAccessToken();
 
       const messageId = `mock_message_${Date.now()}`;
       const threadId = `mock_thread_${Date.now()}`;
 
-      return {
+      return Promise.resolve({
         success: true,
         data: {
           messageId,
           threadId,
         },
         status: ExecutionStatus.SUCCESS,
-      };
+      });
     } catch (error) {
-      return {
+      return Promise.resolve({
         success: false,
         error: error instanceof Error ? error.message : "Failed to send email",
         status: ExecutionStatus.FAILED,
-      };
+      });
     }
   }
 }

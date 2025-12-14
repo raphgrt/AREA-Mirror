@@ -19,4 +19,3 @@ export class CreateCredentialsDto {
   })
   data: Record<string, any>;
 }
-
