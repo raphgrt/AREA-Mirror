@@ -44,6 +44,6 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.BACKEND_PORT ?? 8080);
+  await app.listen(process.env.BACKEND_PORT ?? 8080, "0.0.0.0");
 }
 void bootstrap();
