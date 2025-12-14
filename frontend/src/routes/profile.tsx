@@ -1,14 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { DashboardLayout } from '../components/dashboard/DashboardLayout'
 import { User, Trash2 } from 'lucide-react'
-import { useAppSelector } from '../store/hooks'
+import { useSession } from '../lib/auth-client'
 
 export const Route = createFileRoute('/profile')({
   component: Profile,
 })
 
 function Profile() {
-  const user = useAppSelector((state) => state.auth.user)
+  const { data: session } = useSession()
+  const user = session?.user
 
   if (!user) return null
 

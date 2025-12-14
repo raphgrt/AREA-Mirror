@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { signUp } from '../lib/auth-client'
-import { useAppDispatch } from '../store/hooks'
-import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice'
 
 export const Route = createFileRoute('/register')({
   component: Register,
@@ -10,18 +8,17 @@ export const Route = createFileRoute('/register')({
 
 function Register() {
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    dispatch(loginStart())
+    setLoading(true)
 
     try {
       const result = await signUp.email({
@@ -32,7 +29,7 @@ function Register() {
           onError: (ctx) => {
             const errorMsg = ctx.error.message || 'Failed to create account'
             setError(errorMsg)
-            dispatch(loginFailure(errorMsg))
+            setLoading(false)
           },
         },
       })
@@ -40,24 +37,15 @@ function Register() {
       if (result.error) {
         const errorMsg = result.error.message || 'Failed to create account. Please try again.'
         setError(errorMsg)
-        dispatch(loginFailure(errorMsg))
+        setLoading(false)
         return
-      }
-
-      if (result.data?.user) {
-        dispatch(loginSuccess({
-          id: result.data.user.id,
-          email: result.data.user.email,
-          name: result.data.user.name,
-          avatarUrl: result.data.user.image || undefined,
-        }))
       }
 
       navigate({ to: '/dashboard' })
     } catch (err: any) {
       const errorMsg = err?.message || 'Failed to create account. Please try again.'
       setError(errorMsg)
-      dispatch(loginFailure(errorMsg))
+      setLoading(false)
       console.error('Registration error:', err)
     }
   }

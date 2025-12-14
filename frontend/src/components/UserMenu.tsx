@@ -8,12 +8,12 @@ import {
   MoreVertical
 } from 'lucide-react'
 import clsx from 'clsx'
-import { useAppSelector } from '../store/hooks'
-import { signOut } from '../lib/auth-client'
+import { signOut, useSession } from '../lib/auth-client'
 
 export function UserMenu() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const user = useAppSelector((state) => state.auth.user)
+  const { data: session } = useSession()
+  const user = session?.user
   const navigate = useNavigate()
 
   const handleLogout = async () => {

@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { signIn } from '../lib/auth-client'
-import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice'
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -10,8 +8,7 @@ export const Route = createFileRoute('/login')({
 
 function Login() {
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const isLoading = useAppSelector((state) => state.auth.isLoading)
+  const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -19,7 +16,7 @@ function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    dispatch(loginStart())
+    setIsLoading(true)
 
     try {
       const result = await signIn.email({
@@ -29,7 +26,7 @@ function Login() {
           onError: (ctx) => {
             const errorMsg = ctx.error.message || 'Invalid email or password'
             setError(errorMsg)
-            dispatch(loginFailure(errorMsg))
+            setIsLoading(false)
           },
         },
       })
@@ -37,24 +34,15 @@ function Login() {
       if (result.error) {
         const errorMsg = result.error.message || 'Invalid email or password'
         setError(errorMsg)
-        dispatch(loginFailure(errorMsg))
+        setIsLoading(false)
         return
-      }
-
-      if (result.data?.user) {
-        dispatch(loginSuccess({
-          id: result.data.user.id,
-          email: result.data.user.email,
-          name: result.data.user.name,
-          avatarUrl: result.data.user.image || undefined,
-        }))
       }
 
       navigate({ to: '/dashboard' })
     } catch (err: any) {
       const errorMsg = err?.message || 'Invalid email or password'
       setError(errorMsg)
-      dispatch(loginFailure(errorMsg))
+      setIsLoading(false)
       console.error('Login error:', err)
     }
   }
