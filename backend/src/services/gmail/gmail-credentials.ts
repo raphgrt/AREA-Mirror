@@ -1,3 +1,4 @@
+import { google } from "googleapis";
 import { BaseCredentials } from "../../common/base/base-credentials";
 import { ServiceProvider, CredentialType } from "../../common/types/enums";
 
@@ -19,28 +20,69 @@ export class GmailCredentials extends BaseCredentials {
     super(userId, ServiceProvider.GMAIL, CredentialType.OAUTH2, name, data, id);
   }
 
-  isValid(): Promise<boolean> {
+  async isValid(): Promise<boolean> {
     const data = this.data as GmailOAuth2Data;
 
     if (!data.accessToken) {
-      return Promise.resolve(false);
+      return false;
     }
 
     if (data.expiresAt && data.expiresAt < Date.now()) {
-      return Promise.resolve(false);
+      if (data.refreshToken) {
+        try {
+          await this.refresh();
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
     }
 
-    return Promise.resolve(true);
+    try {
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+      );
+      oauth2Client.setCredentials({
+        access_token: data.accessToken,
+        refresh_token: data.refreshToken,
+        expiry_date: data.expiresAt,
+      });
+
+      const tokenInfo = await oauth2Client.getAccessToken();
+      return !!tokenInfo.token;
+    } catch {
+      return false;
+    }
   }
 
-  refresh(): Promise<void> {
+  async refresh(): Promise<void> {
     const data = this.data as GmailOAuth2Data;
 
     if (!data.refreshToken) {
-      return Promise.reject(new Error("No refresh token available"));
+      throw new Error("No refresh token available");
     }
 
-    return Promise.reject(new Error("Token refresh not yet implemented"));
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+    );
+    oauth2Client.setCredentials({
+      access_token: data.accessToken,
+      refresh_token: data.refreshToken,
+      expiry_date: data.expiresAt,
+    });
+
+    const { credentials } = await oauth2Client.refreshAccessToken();
+
+    this.data = {
+      ...data,
+      accessToken: credentials.access_token || data.accessToken,
+      refreshToken: credentials.refresh_token || data.refreshToken,
+      expiresAt: credentials.expiry_date || data.expiresAt,
+      tokenType: credentials.token_type || data.tokenType,
+    };
   }
 
   getAccessToken(): string {

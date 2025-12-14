@@ -1,4 +1,4 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { eq, and } from "drizzle-orm";
 import { DRIZZLE } from "../db/drizzle.module";
@@ -27,6 +27,7 @@ export class WorkflowExecutionService {
     @Inject(DRIZZLE) private db: PostgresJsDatabase<typeof schema>,
     private serviceRegistry: ServiceRegistry,
     private credentialsService: CredentialsService,
+    @Inject(forwardRef(() => WorkflowsService))
     private workflowsService: WorkflowsService,
   ) {}
 

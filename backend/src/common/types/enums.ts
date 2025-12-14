@@ -17,6 +17,8 @@ export enum ActionType {
   CREATE_TASK = "create_task",
   UPDATE_STATUS = "update_status",
   TRIGGER_WEBHOOK = "trigger_webhook",
+  // Trigger types
+  RECEIVE_EMAIL = "receive_email",
 }
 
 export enum CredentialType {

@@ -10,6 +10,7 @@ import {
   ExecutionStatus,
 } from "../../../common/types/enums";
 import { GmailCredentials } from "../gmail-credentials";
+import { GmailClient } from "../gmail-client";
 
 export class ReadEmailAction implements IAction {
   public readonly id = "gmail_read_email";
@@ -61,47 +62,58 @@ export class ReadEmailAction implements IAction {
     },
   };
 
-  execute(
+  async execute(
     params: ActionParams,
     credentials: ICredentials,
   ): Promise<ActionResult> {
     if (!(credentials instanceof GmailCredentials)) {
-      return Promise.resolve({
+      return {
         success: false,
         error: "Invalid credentials type for Gmail service",
         status: ExecutionStatus.FAILED,
-      });
+      };
     }
 
     try {
-      void params;
-      credentials.getAccessToken();
+      const client = new GmailClient(credentials);
+      const { messages: messageList, totalCount } = await client.listMessages({
+        query: params.query as string | undefined,
+        maxResults: params.maxResults as number | undefined,
+        labelIds: params.labelIds as string[] | undefined,
+      });
 
-      const messages = [
-        {
-          id: "mock_message_1",
-          threadId: "mock_thread_1",
-          snippet: "This is a sample email snippet",
-          from: "example@gmail.com",
-          subject: "Sample Email",
-          date: new Date().toISOString(),
-        },
-      ];
+      const messages = await Promise.all(
+        messageList.map(async (msg: { id?: string }) => {
+          if (!msg.id) {
+            throw new Error("Message ID is missing");
+          }
+          const fullMessage = await client.getMessage(msg.id);
+          const details = client.getMessageDetails(fullMessage);
+          return {
+            id: details.id,
+            threadId: details.threadId,
+            snippet: details.snippet,
+            from: details.from,
+            subject: details.subject,
+            date: details.date,
+          };
+        }),
+      );
 
-      return Promise.resolve({
+      return {
         success: true,
         data: {
           messages,
-          totalCount: messages.length,
+          totalCount,
         },
         status: ExecutionStatus.SUCCESS,
-      });
+      };
     } catch (error) {
-      return Promise.resolve({
+      return {
         success: false,
         error: error instanceof Error ? error.message : "Failed to read emails",
         status: ExecutionStatus.FAILED,
-      });
+      };
     }
   }
 }

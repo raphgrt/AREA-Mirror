@@ -10,6 +10,7 @@ import {
   ExecutionStatus,
 } from "../../../common/types/enums";
 import { GmailCredentials } from "../gmail-credentials";
+import { GmailClient } from "../gmail-client";
 
 export class SendEmailAction implements IAction {
   public readonly id = "gmail_send_email";
@@ -66,39 +67,58 @@ export class SendEmailAction implements IAction {
     },
   };
 
-  execute(
+  async execute(
     params: ActionParams,
     credentials: ICredentials,
   ): Promise<ActionResult> {
     if (!(credentials instanceof GmailCredentials)) {
-      return Promise.resolve({
+      return {
         success: false,
         error: "Invalid credentials type for Gmail service",
         status: ExecutionStatus.FAILED,
-      });
+      };
     }
 
     try {
-      void params;
-      credentials.getAccessToken();
+      const to = params.to as string;
+      const subject = params.subject as string;
+      const body = params.body as string;
+      const cc = params.cc as string[] | undefined;
+      const bcc = params.bcc as string[] | undefined;
+      const isHtml = (params.isHtml as boolean) || false;
 
-      const messageId = `mock_message_${Date.now()}`;
-      const threadId = `mock_thread_${Date.now()}`;
+      if (!to || !subject || !body) {
+        return {
+          success: false,
+          error: "Missing required fields: to, subject, body",
+          status: ExecutionStatus.FAILED,
+        };
+      }
 
-      return Promise.resolve({
+      const client = new GmailClient(credentials);
+      const result = await client.sendEmail({
+        to,
+        cc,
+        bcc,
+        subject,
+        body,
+        isHtml,
+      });
+
+      return {
         success: true,
         data: {
-          messageId,
-          threadId,
+          messageId: result.messageId,
+          threadId: result.threadId,
         },
         status: ExecutionStatus.SUCCESS,
-      });
+      };
     } catch (error) {
-      return Promise.resolve({
+      return {
         success: false,
         error: error instanceof Error ? error.message : "Failed to send email",
         status: ExecutionStatus.FAILED,
-      });
+      };
     }
   }
 }

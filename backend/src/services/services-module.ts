@@ -5,6 +5,7 @@ import { ActionsService } from "./actions-service";
 import { ServicesService } from "./services-service";
 import { WorkflowsService } from "./workflows-service";
 import { WorkflowExecutionService } from "./workflow-execution-service";
+import { WorkflowTriggerRegistry } from "./workflow-trigger-registry";
 import { GmailService } from "./gmail";
 
 @Global()
@@ -16,6 +17,7 @@ import { GmailService } from "./gmail";
     ServicesService,
     WorkflowsService,
     WorkflowExecutionService,
+    WorkflowTriggerRegistry,
   ],
   exports: [
     ServiceRegistry,
@@ -24,6 +26,7 @@ import { GmailService } from "./gmail";
     ServicesService,
     WorkflowsService,
     WorkflowExecutionService,
+    WorkflowTriggerRegistry,
   ],
 })
 export class ServicesModule implements OnModuleInit {

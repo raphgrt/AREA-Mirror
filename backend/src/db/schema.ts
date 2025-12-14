@@ -38,6 +38,7 @@ export const actionTypeEnum = pgEnum("action_type", [
   "create_task",
   "update_status",
   "trigger_webhook",
+  "receive_email",
 ]);
 
 export const user = pgTable("user", {
