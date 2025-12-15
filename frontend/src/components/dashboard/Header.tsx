@@ -118,10 +118,7 @@ export function DashboardHeader({ onSave }: DashboardHeaderProps) {
               <Pencil size={12} className="opacity-0 group-hover:opacity-50 transition-opacity" />
             </h1>
           )}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-             <span className={clsx("flex h-2 w-2 rounded-full", activeWorkflow.isActive ? "bg-emerald-500" : "bg-gray-400")}></span>
-             {activeWorkflow.isActive ? 'Active' : 'Inactive'}
-          </div>
+
         </div>
       </div>
 
