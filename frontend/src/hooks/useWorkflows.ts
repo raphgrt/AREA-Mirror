@@ -62,6 +62,26 @@ async function deleteWorkflow(id: string): Promise<void> {
   if (!response.ok) throw new Error('Failed to delete workflow')
 }
 
+async function activateWorkflow(id: string): Promise<{ id: number, isActive: boolean }> {
+  const response = await fetch(`${API_BASE}/workflows/${id}/activate`, {
+    method: 'POST',
+    credentials: 'include'
+  })
+
+  if (!response.ok) throw new Error('Failed to activate workflow')
+  return response.json()
+}
+
+async function deactivateWorkflow(id: string): Promise<{ id: number, isActive: boolean }> {
+  const response = await fetch(`${API_BASE}/workflows/${id}/deactivate`, {
+    method: 'POST',
+    credentials: 'include'
+  })
+
+  if (!response.ok) throw new Error('Failed to deactivate workflow')
+  return response.json()
+}
+
 export function useWorkflows() {
   const queryClient = useQueryClient()
 
@@ -91,13 +111,29 @@ export function useWorkflows() {
     },
   })
 
+  const activateMutation = useMutation({
+    mutationFn: activateWorkflow,
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['workflows'] })
+    }
+  })
+
+  const deactivateMutation = useMutation({
+    mutationFn: deactivateWorkflow,
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['workflows'] })
+    }
+  })
+
   return {
     workflows: workflowsQuery.data || [],
     isLoading: workflowsQuery.isLoading,
     isError: workflowsQuery.isError,
     error: workflowsQuery.error,
-    createWorkflow: createMutation.mutate,
-    updateWorkflow: updateMutation.mutate,
-    deleteWorkflow: deleteMutation.mutate,
+    createWorkflow: createMutation.mutateAsync,
+    updateWorkflow: updateMutation.mutateAsync,
+    deleteWorkflow: deleteMutation.mutateAsync,
+    activateWorkflow: activateMutation.mutateAsync,
+    deactivateWorkflow: deactivateMutation.mutateAsync
   }
 }
