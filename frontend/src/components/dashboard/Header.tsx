@@ -68,7 +68,6 @@ export function DashboardHeader({ onSave }: DashboardHeaderProps) {
         try {
             await deleteWorkflow(String(activeWorkflow.id))
             setIsDeleteModalOpen(false)
-            // If the last workflow is deleted, clear the active workflow in store
             if (workflows.length === 1 && workflows[0].id === activeWorkflow.id) {
               dispatch(clearWorkflow())
             }

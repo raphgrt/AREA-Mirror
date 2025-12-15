@@ -59,7 +59,15 @@ async function deleteWorkflow(id: string): Promise<void> {
     credentials: 'include'
   })
 
-  if (!response.ok) throw new Error('Failed to delete workflow')
+  // Workaround: Backend incorrectly returns 404 for successful deletions
+  // Treat 200 OK, 204 No Content, and 404 Not Found as successful for DELETE operations
+  // if the resource is confirmed to be deleted (as reported by user).
+  // A 404 in this context might mean "resource already not found", which implies it's gone.
+  if (response.status === 200 || response.status === 204 || response.status === 404) {
+      return;
+  } else {
+      throw new Error(`Failed to delete workflow with status: ${response.status} ${response.statusText}`);
+  }
 }
 
 async function activateWorkflow(id: string): Promise<{ id: number, isActive: boolean }> {
